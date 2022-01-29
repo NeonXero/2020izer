@@ -46,5 +46,5 @@ class NoteRecyclerAdapter(
         }
 
     }
-//I give up for now UGH
+//I give up for now UGH pushing
 }
