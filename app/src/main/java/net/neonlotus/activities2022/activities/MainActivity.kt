@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +20,7 @@ import net.neonlotus.activities2022.viewModel.MainViewModel
 Libraries
    Koin (dependency injection)
    Retrofit (Networking)
-   Realm (On Device Storage)
+   Realm (On Device Storage)            https://docs.mongodb.com/realm/sdk/android/
 
 Kotlin Topics
    Coroutines
@@ -27,58 +28,70 @@ Kotlin Topics
    Sealed Classes
 
 Android
-   Live Data
-   MVVM
+   Live Data ; working on it
+   MVVM ; working on it
  */
 
 class MainActivity : AppCompatActivity() {
 
     private var viewManager = LinearLayoutManager(this)
-    private lateinit var viewModel: MainViewModel
+    private var adapter: NoteRecyclerAdapter? = null
+    private var blogList = arrayListOf<Blog>()
     private lateinit var mainrecycler: RecyclerView
     private lateinit var but: Button
+
+    private val blogListViewModel by viewModels<MainViewModel> {
+        MainViewModelFactory()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainrecycler = findViewById(R.id.recycler)
-        val application = requireNotNull(this).application
-        val factory = MainViewModelFactory()
-        viewModel = ViewModelProviders.of(this,factory).get(MainViewModel::class.java)
+        mainrecycler = findViewById(R.id.recycler_view)
         but = findViewById(R.id.button)
+
         but.setOnClickListener {
             addData()
         }
 
-        initialiseAdapter()
+        blogList = arrayListOf()
+
+
+        adapter = NoteRecyclerAdapter(blogListViewModel, blogList, this)
+        initializeList() //todo with name and stuff, this is just messing around for now
 
     }
 
-    private fun initialiseAdapter(){
-        mainrecycler.layoutManager = viewManager
+    private fun initializeList() {
+        val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = viewManager
         observeData()
+
     }
 
-    fun observeData(){
-        viewModel.lst.observe(this, Observer{
-            Log.i("data",it.toString())
-            mainrecycler.adapter= NoteRecyclerAdapter(viewModel, it, this)
+    private fun observeData() {
+        blogListViewModel.lst.observe(this, Observer {
+            Log.d("data", it.toString()) //always the full list
+            // D/data: [Blog(title=zzz, author=temp), Blog(title=sadt, author=temp), Blog(title=trtrtrtr, author=temp)]
+            mainrecycler.adapter = NoteRecyclerAdapter(blogListViewModel, it, this)
         })
     }
 
-
-    fun addData(){
+    private fun addData() {
         var txtplce = findViewById<EditText>(R.id.titletxt)
-        var title=txtplce.text.toString()
-        if(title.isNullOrBlank()){
-            Toast.makeText(this,"Enter value!", Toast.LENGTH_LONG).show()
-        }else{
-            var blog= Blog(title)
-            viewModel.add(blog)
+        var title = txtplce.text.toString()
+        if (title.isNullOrBlank()) {
+            Toast.makeText(this, "Enter value!", Toast.LENGTH_SHORT).show()
+        } else {
+            var blog = Blog(title, "temp")
+            blogListViewModel.add(blog)
             txtplce.text.clear()
             mainrecycler.adapter?.notifyDataSetChanged()
         }
 
     }
+
+
 }

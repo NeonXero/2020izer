@@ -39,6 +39,12 @@
             android:backgroundTint="#ffff"
             android:src="@drawable/ic_action_name" />
 
+        <TextView
+            android:id="@+id/dupe_first"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DUPE FIRST" />
+
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

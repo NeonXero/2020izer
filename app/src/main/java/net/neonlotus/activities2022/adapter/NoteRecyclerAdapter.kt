@@ -4,7 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import net.neonlotus.activities2022.R
 import net.neonlotus.activities2022.model.Blog
@@ -15,36 +16,59 @@ class NoteRecyclerAdapter(
     val viewModel: MainViewModel,
     val arrayList: ArrayList<Blog>,
     val context: Context
-) : RecyclerView.Adapter<NoteRecyclerAdapter.NotesViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotesViewHolder {
-        //val binding = ElementListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        var root = LayoutInflater.from(context).inflate(R.layout.item, parent, false)
-        return NotesViewHolder(root)
+) : RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder>() {
+
+    // Create new views (invoked by the layout manager)
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+        // Create a new view, which defines the UI of the list item
+        val view = LayoutInflater.from(viewGroup.context)
+            .inflate(R.layout.item, viewGroup, false)
+
+        return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: NoteRecyclerAdapter.NotesViewHolder, position: Int) {
-        holder.bind(arrayList.get(position))
+    // Replace the contents of a view (invoked by the layout manager)
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+
+        // Get element from your dataset at this position and replace the
+        // contents of the view with that element
+        viewHolder.tvTitle.text = arrayList[position].title
+
+        viewHolder.delete.setOnClickListener {
+            viewModel.remove(arrayList[position])
+            notifyItemRemoved(position)
+        }
+
+        viewHolder.tvDupe.setOnClickListener {
+            viewModel.dupeFirst()
+            notifyDataSetChanged()
+        }
     }
+
 
     override fun getItemCount(): Int {
-        if (arrayList.size == 0) {
-            Toast.makeText(context, "List is empty", Toast.LENGTH_LONG).show()
-        } else {
-
-        }
+//        if (arrayList.size == 0) {
+//            Toast.makeText(context, "List is empty", Toast.LENGTH_SHORT).show()
+//        }
         return arrayList.size
     }
 
 
-    inner class NotesViewHolder(private val binding: View) : RecyclerView.ViewHolder(binding) {
-        fun bind(blog: Blog) {
-            binding.title.text = blog.title
-            binding.delete.setOnClickListener {
-                viewModel.remove(blog)
-                notifyItemRemoved(arrayList.indexOf(blog))
-            }
-        }
+    /**
+     * Provide a reference to the type of views that you are using
+     * (custom ViewHolder).
+     */
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvTitle: TextView
+        val delete: ImageButton
+        val tvDupe: TextView
 
+        init {
+
+            tvTitle = view.findViewById(R.id.title)
+            delete = view.findViewById(R.id.delete)
+            tvDupe = view.findViewById(R.id.dupe_first)
+
+        }
     }
-//I give up for now UGH pushing
 }
