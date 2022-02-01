@@ -38,11 +38,6 @@ class NoteRecyclerAdapter(
             viewModel.remove(arrayList[position])
             notifyItemRemoved(position)
         }
-
-        viewHolder.tvDupe.setOnClickListener {
-            viewModel.dupeFirst()
-            notifyDataSetChanged()
-        }
     }
 
 
@@ -61,14 +56,10 @@ class NoteRecyclerAdapter(
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTitle: TextView
         val delete: ImageButton
-        val tvDupe: TextView
 
         init {
-
             tvTitle = view.findViewById(R.id.title)
             delete = view.findViewById(R.id.delete)
-            tvDupe = view.findViewById(R.id.dupe_first)
-
         }
     }
 }

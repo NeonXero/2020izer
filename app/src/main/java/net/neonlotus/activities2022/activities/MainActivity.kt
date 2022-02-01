@@ -10,15 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.RealmResults
-import io.realm.kotlin.where
 import net.neonlotus.activities2022.R
 import net.neonlotus.activities2022.adapter.NoteRecyclerAdapter
 import net.neonlotus.activities2022.factory.MainViewModelFactory
 import net.neonlotus.activities2022.model.Blog
-import net.neonlotus.activities2022.realm.Task
 import net.neonlotus.activities2022.viewModel.MainViewModel
 
 /*
@@ -54,26 +49,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //Realm WIP example stuff
-        Realm.init(this) // context, usually an Activity or Application
-        val realmName: String = "My Project"
-        val config = RealmConfiguration.Builder().name(realmName).build()
-        val backgroundThreadRealm: Realm = Realm.getInstance(config)
-
-        val task: Task = Task()
-        task.name = "New Task"
-
-
-
-        backgroundThreadRealm.executeTransaction { transactionRealm ->
-            transactionRealm.insert(task)
-        }
-
-        // all tasks in the realm
-        val tasks: RealmResults<Task> = backgroundThreadRealm.where<Task>().findAll()
-
-        Log.d("ryan", "Realm read size " + tasks.size)
+//        Realm.init(this) // context, usually an Activity or Application
+//        val realmName: String = "My Project"
+//        val config = RealmConfiguration.Builder().name(realmName).build()
+//        val backgroundThreadRealm: Realm = Realm.getInstance(config)
+//
+//        val task: Task = Task()
+//        task.name = "New Task"
+//
+//
+//
+//        backgroundThreadRealm.executeTransaction { transactionRealm ->
+//            transactionRealm.insert(task)
+//        }
+//
+//        // all tasks in the realm
+//        val tasks: RealmResults<Task> = backgroundThreadRealm.where<Task>().findAll()
+//
+//        Log.d("ryan", "Realm read size " + tasks.size)
 
         //END Realm WIP example stuff
+
+
+        //Retrofit example stuff ; WORKS - let's try to update the list with quotes :D issues updating UI thread stuff
+        //I made some changes to use view model stuff, works well!
+        blogListViewModel.getQuotes()
+        //END Retrofit example stuff
 
         mainrecycler = findViewById(R.id.recycler_view)
         but = findViewById(R.id.button)
@@ -117,8 +118,5 @@ class MainActivity : AppCompatActivity() {
             txtplce.text.clear()
             mainrecycler.adapter?.notifyDataSetChanged()
         }
-
     }
-
-
 }
