@@ -10,20 +10,28 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.RealmResults
+import io.realm.kotlin.where
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.neonlotus.activities2022.R
 import net.neonlotus.activities2022.adapter.NoteRecyclerAdapter
 import net.neonlotus.activities2022.factory.MainViewModelFactory
 import net.neonlotus.activities2022.model.Blog
+import net.neonlotus.activities2022.realm.Task
 import net.neonlotus.activities2022.viewModel.MainViewModel
 
 /*
 Libraries
    Koin (dependency injection)
-   Retrofit (Networking)
+   Retrofit (Networking) ; mostly the same, viewmodel, gg etc ; working on it
    Realm (On Device Storage)            https://docs.mongodb.com/realm/sdk/android/
 
 Kotlin Topics
-   Coroutines
+   Coroutines ; working on it
    Extension Functions
    Sealed Classes
 
@@ -40,6 +48,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainrecycler: RecyclerView
     private lateinit var but: Button
 
+    lateinit var realmName: String
+    lateinit var config: RealmConfiguration
+    // just doing Realm.getInstance(config) for whenever I need to reference it?
+    // lateinit var backgroundThreadRealm: Realm
+
     private val blogListViewModel by viewModels<MainViewModel> {
         MainViewModelFactory()
     }
@@ -49,24 +62,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //Realm WIP example stuff
-//        Realm.init(this) // context, usually an Activity or Application
-//        val realmName: String = "My Project"
-//        val config = RealmConfiguration.Builder().name(realmName).build()
-//        val backgroundThreadRealm: Realm = Realm.getInstance(config)
-//
-//        val task: Task = Task()
-//        task.name = "New Task"
-//
-//
-//
-//        backgroundThreadRealm.executeTransaction { transactionRealm ->
-//            transactionRealm.insert(task)
-//        }
-//
-//        // all tasks in the realm
-//        val tasks: RealmResults<Task> = backgroundThreadRealm.where<Task>().findAll()
-//
-//        Log.d("ryan", "Realm read size " + tasks.size)
+        initRealm()
+
+        val task = Task()
+        task.name = "New Task"
+        val task2 = Task()
+        task2.name = "second task"
+
+        //TODO figure out a better way to Realm.getInstance
+        // couldn't access on different threads or blah blah when doing it other way
+        GlobalScope.launch(Dispatchers.IO) {
+            Realm.getInstance(config).executeTransaction { transactionRealm ->
+                transactionRealm.insertOrUpdate(task)
+                transactionRealm.insertOrUpdate(task2)
+            }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val tasks: RealmResults<Task> = Realm.getInstance(config).where<Task>().findAll()
+            Log.d(
+                "ryan",
+                "Realm read size " + tasks.size
+            ) //THINK IT WORKS - not quite .. runs after insert
+            //TODO make sure it runs after insert. Not sure if this is even a real world example - but either way, figure it out
+        }
 
         //END Realm WIP example stuff
 
@@ -89,6 +108,14 @@ class MainActivity : AppCompatActivity() {
         adapter = NoteRecyclerAdapter(blogListViewModel, blogList, this)
         initializeList() //todo with name and stuff, this is just messing around for now
 
+    }
+
+    fun initRealm() {
+        Realm.init(this) // context, usually an Activity or Application
+
+        realmName = "My Project"
+        config = RealmConfiguration.Builder().name(realmName).build()
+//        backgroundThreadRealm = Realm.getInstance(config)
     }
 
     private fun initializeList() {
