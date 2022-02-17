@@ -1,7 +1,6 @@
 package net.neonlotus.activities2022.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,13 +8,12 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import net.neonlotus.activities2022.R
-import net.neonlotus.activities2022.retrofitexample.QuoteObject
 import net.neonlotus.activities2022.viewModel.MainViewModel
 
 
 class NoteRecyclerAdapter(
     val viewModel: MainViewModel,
-    val arrayList: ArrayList<QuoteObject>,
+    val arrayList: ArrayList<String>,
     val context: Context
 ) : RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder>() {
 
@@ -34,12 +32,12 @@ class NoteRecyclerAdapter(
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        viewHolder.tvTitle.text = arrayList[position].content
+        //viewHolder.tvTitle.text = arrayList[position].content
 
-        viewHolder.delete.setOnClickListener {
-            viewModel.remove(arrayList[position])
-            notifyItemRemoved(position)
-        }
+//        viewHolder.delete.setOnClickListener {
+//            viewModel.remove(arrayList[position])
+//            notifyItemRemoved(position)
+//        }
     }
 
 
@@ -57,12 +55,12 @@ class NoteRecyclerAdapter(
      * (custom ViewHolder).
      */
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvTitle: TextView
-        val delete: ImageButton
+        //val tvTitle: TextView
+        //val delete: ImageButton
 
         init {
-            tvTitle = view.findViewById(R.id.title)
-            delete = view.findViewById(R.id.delete)
+            //tvTitle = view.findViewById(R.id.title)
+            //delete = view.findViewById(R.id.delete)
         }
     }
 }

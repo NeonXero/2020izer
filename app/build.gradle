@@ -36,9 +36,9 @@ android {
         dataBinding true
     }
 
-    realm {
-        syncEnabled = true
-    }
+//    realm {
+//        syncEnabled = true
+//    }
 }
 
 dependencies {

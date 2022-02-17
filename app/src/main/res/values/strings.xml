@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">2022izer</string>
+
+    <string name="main_button_add">ADD</string>
+    <string name="main_button_games">GAMES</string>
+    <string name="main_button_movies">MOVIES</string>
+    <string name="main_button_shows">SHOWS</string>
+    <string name="main_button_books">BOOKS</string>
+
+
 </resources>
