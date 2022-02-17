@@ -3,6 +3,7 @@ package net.neonlotus.activities2022.realm
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import io.realm.annotations.Required
+import net.neonlotus.activities2022.retrofitexample.QuoteObject
 
 enum class TaskStatus(val displayName: String) {
     Open("Open"),
@@ -30,4 +31,13 @@ open class Task() : RealmObject() {
         set(value) {
             status = value.name
         }
+}
+
+open class RealmQuote() : RealmObject() {
+    @PrimaryKey
+    var id: String = "id"
+
+    var content: String = "content"
+    var author: String = "author"
+    var length: Int = 0
 }

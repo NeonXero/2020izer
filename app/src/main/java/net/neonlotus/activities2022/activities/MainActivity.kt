@@ -20,8 +20,8 @@ import kotlinx.coroutines.launch
 import net.neonlotus.activities2022.R
 import net.neonlotus.activities2022.adapter.NoteRecyclerAdapter
 import net.neonlotus.activities2022.factory.MainViewModelFactory
-import net.neonlotus.activities2022.model.Blog
-import net.neonlotus.activities2022.realm.Task
+import net.neonlotus.activities2022.realm.RealmQuote
+import net.neonlotus.activities2022.retrofitexample.QuoteObject
 import net.neonlotus.activities2022.viewModel.MainViewModel
 
 /*
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     private var viewManager = LinearLayoutManager(this)
     private var adapter: NoteRecyclerAdapter? = null
-    private var blogList = arrayListOf<Blog>()
+    private var blogList = arrayListOf<QuoteObject>()
     private lateinit var mainrecycler: RecyclerView
     private lateinit var but: Button
 
@@ -64,26 +64,36 @@ class MainActivity : AppCompatActivity() {
         //Realm WIP example stuff
         initRealm()
 
-        val task = Task()
-        task.name = "New Task"
-        val task2 = Task()
-        task2.name = "second task"
+
+//        GlobalScope.launch(Dispatchers.IO) {
+//            Realm.getInstance(config).executeTransaction { transactionRealm ->
+//                transactionRealm.deleteAll()
+//            }
+//        }
+
 
         //TODO figure out a better way to Realm.getInstance
         // couldn't access on different threads or blah blah when doing it other way
-        GlobalScope.launch(Dispatchers.IO) {
-            Realm.getInstance(config).executeTransaction { transactionRealm ->
-                transactionRealm.insertOrUpdate(task)
-                transactionRealm.insertOrUpdate(task2)
-            }
-        }
+//        GlobalScope.launch(Dispatchers.IO) {
+//            Realm.getInstance(config).executeTransaction { transactionRealm ->
+//                transactionRealm.insertOrUpdate(task)
+//                transactionRealm.insertOrUpdate(task2)
+//            }
+//        }
 
         GlobalScope.launch(Dispatchers.IO) {
-            val tasks: RealmResults<Task> = Realm.getInstance(config).where<Task>().findAll()
-            Log.d(
-                "ryan",
-                "Realm read size " + tasks.size
-            ) //THINK IT WORKS - not quite .. runs after insert
+            val tasks: RealmResults<RealmQuote> =
+                Realm.getInstance(config).where<RealmQuote>().findAll()
+            //Log.d("ryan", "Realm read size " + tasks.size) //THINK IT WORKS - not quite .. runs after insert
+
+            if (tasks.size > 0) {
+                Log.d("ryan", "use db items")
+                //blogListViewModel.getQuotesFromDB(tasks)
+            } else {
+                Log.d("ryan", "use api items")
+                blogListViewModel.getQuotes()
+            }
+
             //TODO make sure it runs after insert. Not sure if this is even a real world example - but either way, figure it out
         }
 
@@ -92,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 
         //Retrofit example stuff ; WORKS - let's try to update the list with quotes :D issues updating UI thread stuff
         //I made some changes to use view model stuff, works well!
-        blogListViewModel.getQuotes()
+        //blogListViewModel.getQuotes()
         //END Retrofit example stuff
 
         mainrecycler = findViewById(R.id.recycler_view)
@@ -102,9 +112,9 @@ class MainActivity : AppCompatActivity() {
             addData()
         }
 
-        blogList = arrayListOf()
 
 
+        Log.d("ryan", "passing in size ${blogList.size}")
         adapter = NoteRecyclerAdapter(blogListViewModel, blogList, this)
         initializeList() //todo with name and stuff, this is just messing around for now
 
@@ -128,10 +138,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeData() {
         blogListViewModel.lst.observe(this, Observer {
-            Log.d("data", it.toString()) //always the full list
+            //Log.d("data", it.toString()) //always the full list
+            Log.d("ryan", "observe data size ${blogListViewModel.lst.value?.size}")
             // D/data: [Blog(title=zzz, author=temp), Blog(title=sadt, author=temp), Blog(title=trtrtrtr, author=temp)]
             mainrecycler.adapter = NoteRecyclerAdapter(blogListViewModel, it, this)
+
+            saveToRealm(blogListViewModel.lst.value)
         })
+    }
+
+    private fun saveToRealm(data: ArrayList<QuoteObject>?) {
+        GlobalScope.launch(Dispatchers.IO) {
+            Realm.getInstance(config).executeTransaction { transactionRealm ->
+                data?.forEach {
+                    val realmQuote = RealmQuote()
+                    realmQuote.author = it.author
+                    realmQuote.content = it.content
+                    realmQuote.id = it._id
+                    realmQuote.length = it.length
+                    Log.d("ryan", "donger ${it.author}")
+
+                    transactionRealm.insertOrUpdate(realmQuote)
+                }
+            }
+        }
     }
 
     private fun addData() {
@@ -140,8 +170,17 @@ class MainActivity : AppCompatActivity() {
         if (title.isNullOrBlank()) {
             Toast.makeText(this, "Enter value!", Toast.LENGTH_SHORT).show()
         } else {
-            var blog = Blog(title, "temp")
-            blogListViewModel.add(blog)
+            var quotez = QuoteObject(
+                "id",
+                "author",
+                "slug",
+                "content",
+                "dateadded",
+                "datemod",
+                1,
+                listOf("tag1", "tag2")
+            )
+            blogListViewModel.add(quotez)
             txtplce.text.clear()
             mainrecycler.adapter?.notifyDataSetChanged()
         }
